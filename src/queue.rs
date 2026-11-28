@@ -98,7 +98,7 @@ impl SourcesQueueInput {
     ///
     /// Polling past the source's end calls the callback inline, possibly on the audio thread while samples are still buffered. Therefore the callback should return promptly without blocking or panicking.
     ///
-    /// Note: the callback will not be called if the queue is dropped or [SourcesQueueInput::clear] is called
+    /// Note: the callback will not be called if the queue is dropped or if the callback is still in pending sources when [SourcesQueueInput::clear] is called
     #[inline]
     pub fn append_with_callback<T, F>(&self, source: T, callback: F)
     where
@@ -125,6 +125,8 @@ impl SourcesQueueInput {
     }
 
     /// Removes all the sounds from the queue. Returns the number of sounds cleared.
+    /// 
+    /// Note: Callbacks from [SourcesQueueInput::append_with_callback] will not be called.
     pub fn clear(&self) -> usize {
         let mut sounds = self.next_sounds.lock().unwrap();
         let len = sounds.len();
@@ -536,6 +538,8 @@ mod tests {
                 break;
             }
         }
+        
+        assert_eq!(*flag.lock().unwrap(), 0);
 
         let _ = rx.next();
 
