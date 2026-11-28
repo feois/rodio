@@ -534,12 +534,11 @@ mod tests {
 
         loop {
             let _ = rx.next();
+            assert_eq!(*flag.lock().unwrap(), 0);
             if rx.current.is_exhausted() {
                 break;
             }
         }
-        
-        assert_eq!(*flag.lock().unwrap(), 0);
 
         let _ = rx.next();
 
